@@ -6,6 +6,10 @@ export const register = async (req, res) => {
   const { email, password, username } = req.body;
 
   try {
+    const userFound = await User.findOne({ email: email });
+    if (userFound)
+      return res.status(400).json(["The email address is already in use."]);
+
     const passwordHash = await bcrypt.hash(password, 10);
 
     const newUser = new User({
@@ -40,7 +44,7 @@ export const login = async (req, res) => {
 
     const isMatch = await bcrypt.compare(password, userFound.password);
     if (!isMatch)
-      return res.status(400).json({ message: "Incorrect password" });
+      return res.status(400).json({ message: "Incorrect email or password" });
 
     const token = await createAccessToken({ id: userFound._id });
 
